@@ -2,7 +2,7 @@ package it.unibo.oop.lab.lambda;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.google.common.collect.Sets;
 
 /**
  * This class will contain four utility functions on lists and maps, of which the first one is provided as example.
@@ -60,15 +62,9 @@ public final class LambdaUtilities {
      *         otherwise.
      */
     public static <T> List<Optional<T>> optFilter(final List<T> list, final Predicate<T> pre) {
-        final List<Optional<T>> l = new LinkedList<>();
-        list.forEach(elem -> {
-            if (pre.test(elem)) {
-                l.add(Optional.of(elem));
-            } else {
-                l.add(Optional.empty());
-            }
-        });
-        return l;
+        final List<Optional<T>> result = new LinkedList<>();
+        list.forEach(elem -> result.add(Optional.of(elem).filter(pre)));
+        return result;
     }
 
     /**
@@ -84,17 +80,9 @@ public final class LambdaUtilities {
      *         based on the mapping done by the function
      */
     public static <R, T> Map<R, Set<T>> group(final List<T> list, final Function<T, R> op) {
-        final Map<R, Set<T>> map = new HashMap<>();
-        list.forEach(elem -> {
-            final R group = op.apply(elem);
-            if (!map.containsKey(group)) {
-                // group is not present
-                map.put(group, new HashSet<>());
-            }
-            final Set<T> set = map.get(group);
-            set.add(elem);
-        });
-        return map;
+        final Map<R, Set<T>> result = new LinkedHashMap<>();
+        list.forEach(elem -> result.merge(op.apply(elem), Set.of(elem), Sets::union));
+        return result;
     }
 
     /**
@@ -110,20 +98,9 @@ public final class LambdaUtilities {
      *         by the supplier
      */
     public static <K, V> Map<K, V> fill(final Map<K, Optional<V>> map, final Supplier<V> def) {
-        /*
-         * Suggestion: consider Optional.orElse
-         *
-         * Keep in mind that a map can be iterated through its forEach method
-         */
-        final Map<K, V> hmap = new HashMap<>();
-        map.forEach((k, v) -> {
-            if (v.isPresent()) {
-                hmap.put(k, v.get());
-            } else {
-                hmap.put(k, def.get());
-            }
-        });
-        return hmap;
+        final Map<K, V> result = new LinkedHashMap<>();
+        map.forEach((k, v) -> result.put(k, v.orElse(def.get())));
+        return result;
     }
 
     /**

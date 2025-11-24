@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
         // JUnit API and testing engine
+        implementation("com.google.guava:guava:33.5.0-jre")
         testImplementation(platform("org.junit:junit-bom:6.0.1"))
         testImplementation("org.junit.jupiter:junit-jupiter-api")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
