@@ -90,8 +90,8 @@ final class TestMusicGroup {
     @Test
     void testAlbumInYear() {
         final List<String> result = Arrays.asList(II, I);
-        final List<String> actual = lz.albumInYear(1969).collect(toList());
-        assertEquals(result, actual);
+            final List<String> actual = lz.albumInYear(1969).collect(toList());
+            assertEquals(result, actual);
     }
 
     /**
