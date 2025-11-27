@@ -14,9 +14,6 @@ import java.util.StringTokenizer;
  */
 public final class DrawNumberApp implements DrawNumberViewObserver {
 
-    private static final int DEFAULT_MIN = 0;
-    private static final int DEFAULT_MAX = 100;
-    private static final int DEFAULT_ATTEMPTS = 10;
     private static final String CONFIG_FILE = "config.yml";
     private static final String PATH = "src" 
                                         + File.separator 
@@ -42,14 +39,17 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
      */
     public DrawNumberApp(final DrawNumberView... views) {
         /*
-        * if try-catch fails
-        */
-        int min = DEFAULT_MIN;
-        int max = DEFAULT_MAX; 
-        int attempts = DEFAULT_ATTEMPTS;
+         * Side-effect proof
+         */
+        this.views = Arrays.asList(Arrays.copyOf(views, views.length));
+        for (final DrawNumberView view: views) {
+            view.setObserver(this);
+            view.start();
+        }
         /*
         * Read rules 
         */
+        final Configuration.Builder builder = new Configuration.Builder();
         try (BufferedReader br = new BufferedReader(new FileReader(PATH, StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {   //NOPMD
@@ -58,30 +58,32 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
                 final int value = Integer.parseInt(st.nextToken().trim());
                 switch (key) {
                     case "minimum":
-                        min = value;
+                        builder.setMin(value);
                         break;
                     case "maximum":
-                        max = value;
+                        builder.setMax(value);
                         break;
                     case "attempts":
-                        attempts = value;
+                        builder.setAttempts(value);
                         break;
                     default: 
                         throw new IllegalStateException("Error in " + PATH);
                 }
             }
         } catch (final IOException e) {
-            e.printStackTrace();  //NOPMD
+            for (final DrawNumberView view : views) {
+                    view.displayError(e.getMessage()); 
+            }
         }
-        /*
-         * Side-effect proof
-         */
-        this.views = Arrays.asList(Arrays.copyOf(views, views.length));
-        for (final DrawNumberView view: views) {
-            view.setObserver(this);
-            view.start();
+        final Configuration conf = builder.build();
+        if (conf.isConsistent()) {
+            this.model = new DrawNumberImpl(conf);
+        } else {
+            for (final DrawNumberView view : views) {
+                    view.displayError("Error: usign a defual value"); 
+            }
+            this.model = new DrawNumberImpl(new Configuration.Builder().build());
         }
-        this.model = new DrawNumberImpl(min, max, attempts);
     }
 
     @Override

@@ -1,4 +1,0 @@
-Your number is too small
-Your number is too big
-Your number is too small
-You won
