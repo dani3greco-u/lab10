@@ -1,5 +1,7 @@
 package it.unibo.mvc;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -80,7 +82,7 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
             this.model = new DrawNumberImpl(conf);
         } else {
             for (final DrawNumberView view : views) {
-                    view.displayError("Error: usign a defual value"); 
+                    view.displayError("Error: usign a defualt value"); 
             }
             this.model = new DrawNumberImpl(new Configuration.Builder().build());
         }
@@ -106,6 +108,10 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
     }
 
     @Override
+    @SuppressFBWarnings(
+        value = "DM_EXIT",
+        justification = "Acceptable for exercising purposes."
+    )
     public void quit() {
         /*
          * A bit harsh. A good application should configure the graphics to exit by
